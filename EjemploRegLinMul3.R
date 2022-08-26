@@ -5,7 +5,7 @@
 rm(list = ls(all.names = TRUE))
 gc()
 
-setwd("/home/diego/Documents/Aprendizaje_Estadistica")
+setwd("/home/diego/Documents/Aprendizaje_Estadistica/datasets")
 Datos=read.csv("ejemplo3RLM.csv", header=TRUE )
 
 summary(Datos)
@@ -13,7 +13,7 @@ str(Datos)
 
 #Siempre asegurarse que la variable categórica está definida como factor
 Datos$X1c=factor(Datos$X1c)
-str(Datos)
+str(Datos); View(Datos)
 
 par(mfrow=c(1,1),mar=c(4.5,4.5,1,1))
 plot(Datos)
@@ -32,12 +32,13 @@ legend("topleft",levels(Datos[,c("X1c")]), col=c("red", "brown", "blue"), pch = 
 # guardado en el metadato de etiquetas
 levels(Datos$X1c)
 # El modelo que se ajusta por default en R 
-# incluyendo s?lo las dos variables X1c y X2 es
+# incluyendo sólo las dos variables X1c y X2 es
+
 # E(y;x)=b0+b1A2+b2A3+b3x2
 
 fit=lm(y~X1c+X2, data=Datos)
 summary(fit)
-'''
+"
 Call:
 lm(formula = y ~ X1c + X2, data = Datos)
 
@@ -59,12 +60,14 @@ Multiple R-squared:  0.999,	Adjusted R-squared:  0.999
 
 # Al menos una es distinta de cero 
 F-statistic: 8.16e+04 on 3 and 296 DF,  p-value: <2e-16
-'''
+"
 
 
 #Analicemos la Interpretación del modelo con estos parámetros. 
 #Después regresaremos a la prueba asociada a la tabla ANOVA.
-#Aqu? E(y;x1c, x2)=b0+b1A2+b2A3+b3x2 (modelo completo)
+
+#Aquí E(y;x1c, x2)=b0+b1A2+b2A3+b3x2 (modelo completo)
+
 #con el nivel de referencia igual a A1
 #Además notar que en este caso,
 #si consideramos que x1c toma el valor del nivel A1,
@@ -144,7 +147,7 @@ K=matrix(c(0,1,0,0,
 m=c(0,0)
 summary(glht(fit, linfct=K, rhs=m), test=Ftest())
 
-'''
+"
 	 General Linear Hypotheses
 
 Linear Hypotheses:
@@ -155,7 +158,8 @@ Linear Hypotheses:
 Global Test:
      F DF1 DF2    Pr(>F)
 1 4442   2 296 1.76e-221
-'''
+"
+
 #Se observa que se rechaza H0, 
 #entonces la variable X1c nos proporciona información para
 #modelar E(Y;x) aun cuando en el modelo ya está la variable X2.
@@ -169,7 +173,7 @@ anova(fitred, fit)
 # ver si individualmente, al quitar las variables te da o no información sobre el modelo
 drop1(fit, test = "F")
 
-'''
+"
 Single term deletions
 
 Model:
@@ -180,7 +184,7 @@ X1c     2        87   90  -357    4442 <2e-16 *** # significa que incluir esta v
 X2      1      2371 2373   626  241851 <2e-16 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-'''
+"
 
 #Opción 4, usar directamente la función Anova en librería car
 install.packages("car")
@@ -200,29 +204,29 @@ Anova(fit, type="II")
 
 
 #Ahora, si analizamos la prueba t, para el coeficiente b2,
-#se rechaza H0. Aqu? el contraste es H0: b2=0 vs Ha: b2 != 0.
+#se rechaza H0. Aquí el contraste es H0: b2=0 vs Ha: b2 != 0.
 #Esto nos indica, que condicional en un valor fijo de X2,
 #la esperanza de Y es diferente entre
 #el nivel A3 y el A1 (de referencia)
 
 #Con base en lo anterior, 
-#parece que no podr?amos reducir el modelo, todos 
+#parece que no podríamos reducir el modelo, todos 
 #los coeficientes parecen significativos.
 
-#Interpretaci?n del modelo
+#Interpretación del modelo
 
 summary(fit)
-#R2, el coeficiente de determinaci?n, nos indica que se est?
-#explicando el 99.9% de la variabilidad observada en Y a trav?s 
+#R2, el coeficiente de determinación, nos indica que se está
+#explicando el 99.9% de la variabilidad observada en Y a través 
 #del modelo que incluye ambas variables X1c y X2:
 #E(y;X1c, X2)=b0+b1A2+b2A3+b3x2
 
-#Adem?s, b1 se puede interpretar como:
+#Además, b1 se puede interpretar como:
 #condicionado en un valor fijo de X2, el promedio de la variable 
 #Y aumenta en 1.31 unidades al comparar el nivel A2 contra el A1.
 #(mayor esperanza en nivel A2 contra nivel A1)
 #Recordar que nivel A1 es el de referencia en este modelo.
-#Esta interpretaci?n se obtiene al comparar
+#Esta interpretación se obtiene al comparar
 #E(Y;A2, X2)-E(Y;A1, X2)=b0+b1+b3x2-(b0+b3x2)=b1
 
 

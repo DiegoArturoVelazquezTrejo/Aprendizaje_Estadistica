@@ -9,7 +9,7 @@
 rm(list = ls(all.names = TRUE))
 gc()
 
-setwd("/home/diego/Documents/Aprendizaje_Estadistica")
+setwd("/home/diego/Documents/Aprendizaje_Estadistica/datasets")
 options(digits=4)  
 
 
@@ -232,7 +232,7 @@ curve(fitredN, from = min(CADdata$age), to = max(CADdata$age),
 
 
 ####
-#Una revisi?n r?pida de los supuestos
+#Una revisión rápida de los supuestos
 X11()
 par(mfrow = c(2,2), mgp = c(2,0.7,0), mar = c(3,3,1.5,1))
 plot(fitred2, 1)   #linealidad
@@ -263,56 +263,64 @@ residualPlots(fit)
 
 
 ### Uso del modelo
+
+# Modelo final: 
+#E(Y;group=High, age)=  b0 + b1 age
+#E(Y;group= Low, age)=  b0 + b1 age 
+#E(Y;group=  No, age)=  b0 + b1 age +b2 + b3 age = (b0 + b2) + (b1 + b3) age
+
+
 # Con este modelo se pueden contestar preguntas puntuales,
-# por ejemplo, si a los 50 a?os ya se nota en promedio
-# una diferencia entre los que est?n expuestos a cadmio y los que no
+# por ejemplo, si a los 50 años ya se nota en promedio
+# una diferencia entre los que están expuestos a cadmio y los que no
 
 #H0: E(Y;group= High(Low), age=50)=E(Y;group=  No, age=50)
 #vs
 #Ha: E(Y;group= High(Low), age=50)!=E(Y;group=  No, age=50)
 
-#Notar que estas hip?tesis se pueden escribir en t?rminos de 
-#los par?metros:
+#Notar que estas hipótesis se pueden escribir en términos de 
+#los parámetros:
+
+# E(Y;group=High, age)=  b0 + b1 age = (b0 + b2) + (b1 + b3) age  = E(Y;group=  No, age)
 
 #H0: b0 + b1 50 = (b0 + b2) + (b1 + b3) 50
-#Se pasan los par?metros de un lado de la igualdad 
+#Se pasan los parámetros de un lado de la igualdad 
 #H0: b2+b3 (50) = 0
 
 K=matrix(c(0,0,1,50), ncol=4, nrow=1, byrow=TRUE)
 m=c(0)
 summary(glht(fitred2, linfct=K, rhs=m))
 
-#No se rechaza H0, es decir, a los 50 a?os no se encuentra evidencia
-#que indique una diferencia promedio en la capacidad vital
-#entre los que fueron expuestos y los que no
+#No se rechaza H0, es decir, a los 50 años no se encuentra evidencia
+#que indique una diferencia promedio en la capacidad vital entre los que fueron expuestos y los que no
 
 
-#A veces es importante incluir la direcci?n
+#A veces es importante incluir la dirección
 #es decir, los investigadores sospechan que 
-#a los 55 a?os la capacidad vital es en promedio
+#a los 55 años la capacidad vital es en promedio
 #mayor en los no expuestos comparados con los expuestos
 
-#Aqu? tomamos informaci?n del contexto del problema
+#Aquí tomamos información del contexto del problema
 #con base en lo que sospechan los investigadores
-#esto se expresa con una direcci?n en la forma de
-#plantear las hip?tesis
+#esto se expresa con una dirección en la forma de
+#plantear las hipótesis
 
 #H0: E(Y;group= High(Low), age=55) >= E(Y;group=  No, age=55)
 #vs
 #Ha: E(Y;group= High(Low), age=55)  < E(Y;group=  No, age=55)
 
-#Notar que en la Ha s?lo se permiten los casos !=, < o >
+#Notar que en la Ha sólo se permiten los casos !=, < o >
 
-#Esto se puede escribir en t?rminos de los par?metros
+#Esto se puede escribir en términos de los parámetros
 #H0: b0 + b1 55 >= (b0 + b2) + (b1 + b3) 55
 
-#Es decir, pasando los par?metros a un s?lo lado de la 
+#Es decir, pasando los parámetros a un sólo lado de la 
 #desigualdad
 #H0: 0 >= b2 + b3 55
 #vs
 #Ha: 0 < b2 + b3 55   
 
-#La alternativa se usa para definir la direcci?n
+#La alternativa se usa para definir la dirección
 # < f(b0,b1,...,bp) es greater
 # > f(b0,b1,...,bp) es less
 
@@ -323,22 +331,22 @@ summary(glht(fitred2, linfct=K, rhs=m, alternative="greater"))
 #Se rechaza H0, es decir,
 #hay evidencia para concluir que el promedio de capacidad vital
 #es menor en los expuestos comparados con los no expuestos
-#a la edad de 55 a?os.
+#a la edad de 55 años.
 #La diferencia promedio estimada es .635
 
 
-#Una forma de resumir los resultados es presentar una gr?fica 
-#con los intervalos de confianza simult?neos. Con esto
-#es posible identificar en que punto ya se podr?a observar 
+#Una forma de resumir los resultados es presentar una gráfica 
+#con los intervalos de confianza simultáneos. Con esto
+#es posible identificar en que punto ya se podría observar 
 #una diferencia entre los promedios en la capacidad vital
 
 
 
 #Hay dos opciones
-#I. La m?s f?cil de interpretar corresponde a incluir los datos
+#I. La más fácil de interpretar corresponde a incluir los datos
 #las rectas ajustadas y los intervalos de confianza de E(Y).
-#Dado que no considera ninguna informaci?n adicional (direcci?n)
-#podr?a evitar distinguir claramente algo
+#Dado que no considera ninguna información adicional (dirección)
+#podría evitar distinguir claramente algo
 
 X11()
 par(mfrow = c(1,2))
