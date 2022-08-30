@@ -5,7 +5,8 @@
 
 # 2022 - 08 - 23
 # 2022 - 08 - 25
-#
+# 2022 - 08 - 29
+
 rm(list = ls(all.names = TRUE))
 gc()
 
@@ -203,10 +204,27 @@ summary(fitred2)
 #a la tabla ANOVA (p-value: 7.26e-05)
 #También se puede observar que no se podría reducir más el modelo
 
+"
+Coefficients:
+                         Estimate Std. Error t value Pr(>|t|)    
+(Intercept)                8.4499     0.8534    9.90  9.1e-13 
+age                       -0.0910     0.0175   -5.19  5.2e-06 
+I(group == No)TRUE      -3.6605     1.1748   -3.12   0.0032  
+I(age * (group == No))   0.0781     0.0240    3.25   0.0022  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.625 on 44 degrees of freedom
+Multiple R-squared:  0.387,	Adjusted R-squared:  0.345 
+F-statistic: 9.27 on 3 and 44 DF,  p-value: 7.26e-05
+"
+
 #Las rectas ajustadas son
 
 #\hat{E}(Y;group=High, age)=\hat{E}(Y;group=Low, age)= 8.4499 -0.0910 age
+
 #\hat{E}(Y;group=No, age)= (8.4499-3.6605)+(-0.0910+0.0781) age =4.789-0.0129 age
+#E(Y;group=  No, age)    =  b0 + b1 age +b2 + b3 age = (b0 + b2) + (b1 + b3) age
 
 #Se puede observar que la pendiente de los expuestos a cadmio 
 # es mayor en valor absoluto y negativa  
@@ -248,18 +266,22 @@ car::ncvTest(fitred2)
 
 #Normalidad 
 #Se basa en los residuales estandarizados o estudentizados
-#H0: los datos provienen de una distribuci?n normal
-library(broom)
+#H0: los datos provienen de una distribución normal
+library(broom) # para errores estandarizados
 Datosfitred2=augment(fitred2)
-shapiro.test(Datosfitred2$.std.resid)
+shapiro.test(Datosfitred2$.std.resid) # shapiro es la clásica para normalidad
 library(normtest)
-normtest::jb.norm.test(Datosfitred2$.std.resid)
+normtest::jb.norm.test(Datosfitred2$.std.resid) # Residuales estandarizados
+# los errores originales tienen una varianza que no están asociados a una normal estandar 
 #No se rechaza H0, no hay evidencia en contra de la normalidad
+# errores normalizados o estudentizados 
+# queremos compararlos con una distribución única
 
 #Linealidad
 X11()
-library(car)
-residualPlots(fit)
+library(car) # paquete para verificar homocedastidad 
+residualPlots(fit) # H0 : Los residuales no dependen de la variable vs H1: Los residuales sí dependen de la variable 
+# queremos no rechazar H0 (queremos que los residuales no estén asociados a la edad), entonces no vemos un problema en la linealidad
 
 
 ### Uso del modelo
@@ -276,7 +298,7 @@ residualPlots(fit)
 
 #H0: E(Y;group= High(Low), age=50)=E(Y;group=  No, age=50)
 #vs
-#Ha: E(Y;group= High(Low), age=50)!=E(Y;group=  No, age=50)
+#Ha: E(Y;group= High(Low), age=50)!=E(Y;group=  No, age=50)   En la hipótesis alternativa va el != 
 
 #Notar que estas hipótesis se pueden escribir en términos de 
 #los parámetros:
@@ -318,7 +340,7 @@ summary(glht(fitred2, linfct=K, rhs=m))
 #desigualdad
 #H0: 0 >= b2 + b3 55
 #vs
-#Ha: 0 < b2 + b3 55   
+#Ha: 0 < b2 + b3 55   En las alternativas solo se pueden tener los estrictos < o > 
 
 #La alternativa se usa para definir la dirección
 # < f(b0,b1,...,bp) es greater
@@ -326,7 +348,21 @@ summary(glht(fitred2, linfct=K, rhs=m))
 
 K=matrix(c(0,0,1,55), ncol=4, nrow=1, byrow=TRUE)
 m=c(0)
-summary(glht(fitred2, linfct=K, rhs=m, alternative="greater"))
+summary(glht(fitred2, linfct=K, rhs=m, alternative="greater")) # porque la alternativa es la que es mayor a 0, la alternativa siempre es la que va a guiar
+
+"
+	 Simultaneous Tests for General Linear Hypotheses
+
+Fit: lm(formula = vitcap ~ age + I(group == No) + I(age * (group == 
+    No)), data = CADdata)
+
+Linear Hypotheses:
+       Estimate Std. Error t value Pr(>t)   
+1 <= 0    0.635      0.242    2.63 0.0059 **
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+(Adjusted p values reported -- single-step method)
+"
 
 #Se rechaza H0, es decir,
 #hay evidencia para concluir que el promedio de capacidad vital
@@ -334,6 +370,8 @@ summary(glht(fitred2, linfct=K, rhs=m, alternative="greater"))
 #a la edad de 55 años.
 #La diferencia promedio estimada es .635
 
+
+# ------------------------------------------------------------------------------
 
 #Una forma de resumir los resultados es presentar una gráfica 
 #con los intervalos de confianza simultáneos. Con esto
@@ -343,6 +381,7 @@ summary(glht(fitred2, linfct=K, rhs=m, alternative="greater"))
 
 
 #Hay dos opciones
+
 #I. La más fácil de interpretar corresponde a incluir los datos
 #las rectas ajustadas y los intervalos de confianza de E(Y).
 #Dado que no considera ninguna información adicional (dirección)
@@ -359,9 +398,9 @@ summary(CADdata)
 age <- seq(from = 39, to = 65, by = .5)
 length(age)
 
-#Calculares los intervalos de confianza simult?neos para la esperanza
+#Calculares los intervalos de confianza simultáneos para la esperanza
 #de la capacidad vital, para expuestos y no expuestos
-#Bajar? la confianza a 90%, pues ser?n intervalos simult?neos
+#Bajará la confianza a 90%, pues serán intervalos simultáneos
 #de la esperanza y estos suelen ser muy conservadores
 
 #Para la banda del grupo expuesto (high o low)
